@@ -6,6 +6,8 @@ interface UseWaveSurferOptions {
   containerRef: React.RefObject<HTMLDivElement | null>;
   audioRef: React.RefObject<HTMLAudioElement | null>;
   documentId: string | undefined;
+  peaks: number[] | null | undefined;
+  duration: number | null | undefined;
   layoutKey: number;
   shouldAutoPlay: React.MutableRefObject<boolean>;
   isPlayingRef: React.MutableRefObject<boolean>;
@@ -20,6 +22,8 @@ export function useWaveSurfer({
   containerRef,
   audioRef,
   documentId,
+  peaks,
+  duration: songDuration,
   layoutKey,
   shouldAutoPlay,
   isPlayingRef,
@@ -47,6 +51,11 @@ export function useWaveSurfer({
 
     setSongLoading(true);
 
+    // Set the audio source for streaming playback
+    audio.src = getStreamURL(documentId);
+
+    const hasPeaks = peaks && peaks.length > 0;
+
     const ws = WaveSurfer.create({
       container: containerRef.current,
       height: 120,
@@ -59,7 +68,11 @@ export function useWaveSurfer({
       cursorWidth: 0,
       dragToSeek: true,
       barAlign: "bottom" as const,
-      url: getStreamURL(documentId),
+      // Use peaks + duration if available — avoids downloading the full audio for waveform
+      peaks: hasPeaks ? [peaks] : undefined,
+      duration: hasPeaks && songDuration ? songDuration : undefined,
+      // Only fetch audio for waveform if no peaks data
+      url: hasPeaks ? undefined : getStreamURL(documentId),
       media: audio,
     });
 

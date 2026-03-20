@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from "react";
-import { fetchSongs, getStrapiMedia, getStreamURL } from "./api";
+import { fetchSongs, getStrapiMedia } from "./api";
 import { useSwipe } from "./useSwipe";
 import { useWaveSurfer } from "./useWaveSurfer";
 import type { Song, LoopMode, MusicPlayerProps } from "./types";
@@ -44,18 +44,18 @@ export function usePlayerState({ onAudioElement, onSongChange }: Pick<MusicPlaye
     });
   }, []);
 
-  // Preload durations for song list
+  // Use pre-computed durations from API data
   useEffect(() => {
-    songs.forEach((song) => {
-      if (durations[song.documentId]) return;
-      const audio = new Audio();
-      audio.preload = "metadata";
-      audio.addEventListener("loadedmetadata", () => {
-        setDurations((prev) => ({ ...prev, [song.documentId]: audio.duration }));
-      });
-      audio.src = getStreamURL(song.documentId);
-    });
-  }, [songs]); // eslint-disable-line react-hooks/exhaustive-deps
+    const precomputed: Record<string, number> = {};
+    for (const song of songs) {
+      if (song.duration) {
+        precomputed[song.documentId] = song.duration;
+      }
+    }
+    if (Object.keys(precomputed).length > 0) {
+      setDurations((prev) => ({ ...prev, ...precomputed }));
+    }
+  }, [songs]);
 
   // ── Sync song to URL ──
 
@@ -83,6 +83,8 @@ export function usePlayerState({ onAudioElement, onSongChange }: Pick<MusicPlaye
     containerRef: waveformContainerRef,
     audioRef,
     documentId: currentSong?.documentId,
+    peaks: currentSong?.peaks,
+    duration: currentSong?.duration,
     layoutKey,
     shouldAutoPlay: shouldAutoPlayRef,
     isPlayingRef,
