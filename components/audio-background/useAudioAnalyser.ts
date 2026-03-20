@@ -3,8 +3,8 @@
 import { useRef, useEffect, useCallback } from "react";
 
 export interface AudioData {
-  frequencyData: Uint8Array;
-  timeDomainData: Uint8Array;
+  frequencyData: Uint8Array<ArrayBuffer>;
+  timeDomainData: Uint8Array<ArrayBuffer>;
   bass: number;
   mid: number;
   treble: number;
