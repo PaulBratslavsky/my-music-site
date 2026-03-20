@@ -56,7 +56,7 @@ function applyTheme(theme: Theme) {
   }
 }
 
-export function ThemeSwitcher() {
+export function ThemeSwitcher({ overlay = false }: Readonly<{ overlay?: boolean }>) {
   const [theme, setTheme] = useState<Theme>("light");
   const [mounted, setMounted] = useState(false);
 
@@ -86,7 +86,7 @@ export function ThemeSwitcher() {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="size-8 flex items-center justify-center rounded-md hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer">
+      <DropdownMenuTrigger className={`size-8 flex items-center justify-center rounded-md transition-colors cursor-pointer ${overlay ? "hover:bg-white/10 text-white" : "hover:bg-black/5 dark:hover:bg-white/10"}`}>
         {isDark ? <MoonIcon /> : <SunIcon />}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="min-w-[140px] font-sans">

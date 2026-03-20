@@ -1,7 +1,6 @@
 import Image from "next/image";
-import { AlbumRadialEffect } from "../AlbumRadialEffect";
 import { formatTime, getStrapiMedia } from "./api";
-import { PlayIcon, PauseIcon, PrevIcon, NextIcon, RestartIcon, LoopIcon } from "./icons";
+import { PlayIcon, PauseIcon, PrevIcon, NextIcon, RestartIcon, LoopIcon, VolumeHighIcon, VolumeMuteIcon, VolumeLowIcon } from "./icons";
 import { SongRow, HeaderCell } from "./SongRow";
 import type { PlayerState } from "./usePlayerState";
 import type { LoopMode, AudioData } from "./types";
@@ -15,15 +14,15 @@ export function DesktopLayout({ player, sample }: Readonly<DesktopLayoutProps>) 
   const {
     songs, currentSong, isPlaying, loopMode,
     currentTime, duration, durations, songLoading,
-    imageUrl, waveformContainerRef, lastScrolledRef,
+    volume, imageUrl, waveformContainerRef, lastScrolledRef,
     handlePlayPause, playPrev, playNext, restartSong,
-    cycleLoopMode, handleSongClick,
+    cycleLoopMode, setVolume, handleSongClick,
   } = player;
 
   return (
     <>
       {/* Player */}
-      <div className="grid grid-cols-[180px_1fr] grid-rows-[auto_1fr] gap-x-5 gap-y-3 p-5 bg-neutral-100 dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-800 shrink-0 transition-colors">
+      <div className="grid grid-cols-[180px_1fr] grid-rows-[auto_1fr] gap-x-5 gap-y-3 p-5 bg-white dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-800 shrink-0 transition-colors">
         {/* Album art */}
         <div className="row-span-2 rounded-lg overflow-hidden bg-neutral-200 dark:bg-neutral-800 relative">
           {imageUrl ? (
@@ -48,9 +47,6 @@ export function DesktopLayout({ player, sample }: Readonly<DesktopLayoutProps>) 
         <div className="flex items-center gap-4 min-w-0">
           {/* Play/Pause with radial effect */}
           <div className="relative w-14 h-14 flex items-center justify-center shrink-0">
-            <div className="absolute -inset-5 pointer-events-none">
-              {sample && <AlbumRadialEffect sample={sample} />}
-            </div>
             <button
               onClick={handlePlayPause}
               disabled={songLoading}
@@ -65,18 +61,18 @@ export function DesktopLayout({ player, sample }: Readonly<DesktopLayoutProps>) 
 
           {/* Song info */}
           <div className="min-w-0 flex-1">
-            <p className="text-lg font-bold truncate">{currentSong?.title ?? "Select a song"}</p>
+            <p className="text-lg font-black uppercase tracking-tight truncate font-heading">{currentSong?.title ?? "Select a song"}</p>
             {currentSong?.artist?.name && (
-              <p className="text-base text-player-accent truncate">by {currentSong.artist.name}</p>
+              <p className="text-base text-player-accent truncate font-sans">by {currentSong.artist.name}</p>
             )}
-            <p className="text-sm text-neutral-500 dark:text-neutral-400 tabular-nums">
+            <p className="text-sm text-neutral-500 dark:text-neutral-400 tabular-nums font-sans">
               {formatTime(currentTime)}
               {duration > 0 && ` / ${formatTime(duration)}`}
             </p>
           </div>
 
           {/* Transport controls */}
-          <div className="flex gap-1 shrink-0">
+          <div className="flex items-center gap-1 shrink-0">
             <ControlButton onClick={playPrev} label="Previous"><PrevIcon /></ControlButton>
             <ControlButton onClick={restartSong} label="Restart"><RestartIcon /></ControlButton>
             <ControlButton onClick={playNext} label="Next"><NextIcon /></ControlButton>
@@ -84,7 +80,7 @@ export function DesktopLayout({ player, sample }: Readonly<DesktopLayoutProps>) 
           </div>
         </div>
 
-        {/* Row 2: Waveform */}
+        {/* Row 2: Waveform + volume */}
         <div className="relative min-h-[120px]">
           <div ref={waveformContainerRef} className="w-full h-full" />
           {songLoading && (
@@ -92,12 +88,16 @@ export function DesktopLayout({ player, sample }: Readonly<DesktopLayoutProps>) 
               <span className="w-6 h-6 border-2 border-player-accent border-t-transparent rounded-full animate-spin" />
             </div>
           )}
+          {/* Volume — bottom right of waveform */}
+          <div className="absolute bottom-1 right-0 z-10">
+            <VolumeControl volume={volume} onChange={setVolume} />
+          </div>
         </div>
       </div>
 
       {/* Song List */}
       <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain">
-        <div className="grid grid-cols-[32px_44px_1fr_28px_1fr_64px_88px] gap-3 items-center px-4 py-2 border-b border-neutral-200 dark:border-neutral-800 sticky top-0 bg-white dark:bg-neutral-950 z-10 transition-colors">
+        <div className="grid grid-cols-[32px_44px_1fr_28px_1fr_64px_88px] gap-3 items-center px-4 py-2 border-b border-neutral-200 dark:border-neutral-800 sticky top-0 bg-neutral-200 dark:bg-neutral-900 z-10 transition-colors">
           <HeaderCell>#</HeaderCell>
           <span />
           <HeaderCell>Title</HeaderCell>
@@ -157,5 +157,32 @@ function LoopButton({ loopMode, onClick }: Readonly<{ loopMode: LoopMode; onClic
       <LoopIcon />
       {loopMode === "one" && <span className="absolute -bottom-0.5 -right-0.5 text-[9px] font-bold leading-none">1</span>}
     </button>
+  );
+}
+
+function VolumeControl({ volume, onChange }: Readonly<{ volume: number; onChange: (v: number) => void }>) {
+  const VIcon = volume === 0 ? VolumeMuteIcon : volume < 0.5 ? VolumeLowIcon : VolumeHighIcon;
+
+  return (
+    <div className="group/vol flex items-center gap-1.5 opacity-50 hover:opacity-100 transition-opacity">
+      <button
+        type="button"
+        aria-label={volume === 0 ? "Unmute" : "Mute"}
+        onClick={() => onChange(volume === 0 ? 1 : 0)}
+        className="text-neutral-400 dark:text-neutral-500 hover:text-player-accent transition-colors"
+      >
+        <VIcon size={12} />
+      </button>
+      <input
+        type="range"
+        min={0}
+        max={1}
+        step={0.01}
+        value={volume}
+        onChange={(e) => onChange(Number(e.target.value))}
+        className="w-16 h-0.5 appearance-none bg-neutral-300 dark:bg-neutral-700 rounded-full cursor-pointer accent-player-accent"
+        aria-label="Volume"
+      />
+    </div>
   );
 }

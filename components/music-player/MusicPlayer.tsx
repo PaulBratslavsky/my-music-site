@@ -5,8 +5,8 @@ import { MobileLayout } from "./MobileLayout";
 import { DesktopLayout } from "./DesktopLayout";
 import type { MusicPlayerProps } from "./types";
 
-export function MusicPlayer({ onAudioElement, sample, forceMobile }: MusicPlayerProps = {}) {
-  const player = usePlayerState({ onAudioElement });
+export function MusicPlayer({ onAudioElement, onSongChange, sample, forceMobile }: MusicPlayerProps = {}) {
+  const player = usePlayerState({ onAudioElement, onSongChange });
   const useMobile = forceMobile ?? player.isMobile;
 
   if (player.loading) {

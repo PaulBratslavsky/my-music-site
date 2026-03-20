@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { getStrapiMedia } from "@/lib/strapi";
 import type { Song } from "@/lib/types";
 
@@ -18,7 +19,7 @@ function getUniqueArtists(songs: Song[]) {
       name: song.artist?.name ?? "Unknown",
       imageUrl: getStrapiMedia(song.artist?.image?.url ?? song.image?.url ?? null),
       songTitle: song.title,
-      documentId: song.documentId,
+      documentId: id,
     });
     if (artists.length >= 5) break;
   }
@@ -67,7 +68,8 @@ export function LatestArtists({ songs }: LatestArtistsProps) {
             const label = LABELS[i % LABELS.length];
 
             return (
-              <div
+              <Link
+                href={`/artist/${artist.documentId}`}
                 key={artist.documentId}
                 className={`relative group ${pos.className}`}
               >
@@ -111,7 +113,7 @@ export function LatestArtists({ songs }: LatestArtistsProps) {
                     </svg>
                   </div>
                 </div>
-              </div>
+              </Link>
             );
           })}
         </div>
@@ -121,7 +123,7 @@ export function LatestArtists({ songs }: LatestArtistsProps) {
           {artists.map((artist, i) => {
             const label = LABELS[i % LABELS.length];
             return (
-              <div key={artist.documentId} className="shrink-0 snap-start w-64 group">
+              <Link href={`/artist/${artist.documentId}`} key={artist.documentId} className="shrink-0 snap-start w-64 group">
                 <div className="aspect-square relative overflow-hidden rounded-lg">
                   {artist.imageUrl ? (
                     <Image
@@ -143,7 +145,7 @@ export function LatestArtists({ songs }: LatestArtistsProps) {
                   <p className="text-[10px] text-black/40 dark:text-white/40 tracking-[0.15em] uppercase">{label.stage}</p>
                   <p className="text-sm text-black dark:text-white font-black uppercase tracking-tight font-heading">{artist.name}</p>
                 </div>
-              </div>
+              </Link>
             );
           })}
         </div>

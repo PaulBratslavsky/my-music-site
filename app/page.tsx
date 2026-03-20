@@ -15,7 +15,7 @@ export default async function LandingPage() {
     <div className="bg-white dark:bg-black min-h-screen transition-colors">
       {/* Navbar overlays the hero */}
       <div className="absolute top-0 left-0 right-0 z-50">
-        <Navbar />
+        <Navbar overlay />
       </div>
       {/* Hero slider with featured songs */}
       <HeroSlider songs={result.data} />

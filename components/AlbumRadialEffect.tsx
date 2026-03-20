@@ -18,7 +18,10 @@ export function AlbumRadialEffect({ sample }: Readonly<Props>) {
 
     const renderer = new THREE.WebGLRenderer({ alpha: true, premultipliedAlpha: false, antialias: false });
     renderer.setClearColor(0x000000, 0);
-    renderer.setPixelRatio(1);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.domElement.style.width = "100%";
+    renderer.domElement.style.height = "100%";
+    renderer.domElement.style.display = "block";
     container.appendChild(renderer.domElement);
 
     const scene = new THREE.Scene();
@@ -29,9 +32,10 @@ export function AlbumRadialEffect({ sample }: Readonly<Props>) {
     scene.add(mesh);
 
     const resize = () => {
-      const w = container.clientWidth;
-      const h = container.clientHeight;
-      renderer.setSize(w, h);
+      const rect = container.getBoundingClientRect();
+      const w = Math.round(rect.width);
+      const h = Math.round(rect.height);
+      renderer.setSize(w, h, false);
       if (material.uniforms.u_resolution) {
         material.uniforms.u_resolution.value.set(w, h);
       }

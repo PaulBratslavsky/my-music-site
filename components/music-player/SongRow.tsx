@@ -38,7 +38,7 @@ export function SongRow({
       ref={rowRef}
       type="button"
       onClick={onClick}
-      className={`w-full grid grid-cols-[32px_44px_1fr_28px_1fr_64px_88px] gap-3 items-center px-4 py-2.5 border-b border-neutral-100 dark:border-neutral-800 text-left transition-colors last:border-b-0 ${
+      className={`w-full grid grid-cols-[32px_44px_1fr_28px_1fr_64px_88px] gap-3 items-center px-4 py-3 border-b border-neutral-100 dark:border-neutral-800 text-left transition-colors last:border-b-0 ${
         isActive ? "bg-player-accent text-white rounded-md" : "hover:bg-neutral-50 dark:hover:bg-white/5"
       }`}
     >
@@ -50,7 +50,7 @@ export function SongRow({
         )}
       </div>
 
-      <span className={`text-sm truncate ${isActive ? "font-semibold" : ""}`}>
+      <span className={`text-sm truncate font-sans ${isActive ? "font-bold" : ""}`}>
         {song.title || "Untitled"}
       </span>
 
@@ -60,9 +60,9 @@ export function SongRow({
         )}
       </div>
 
-      <span className="text-sm truncate opacity-60">{song.artist?.name || "\u2014"}</span>
-      <span className="text-sm opacity-60 tabular-nums">{duration ? formatTime(duration) : "\u2014"}</span>
-      <span className="text-sm opacity-60">
+      <span className="text-sm truncate opacity-60 font-sans">{song.artist?.name || "\u2014"}</span>
+      <span className="text-sm opacity-60 tabular-nums font-sans">{duration ? formatTime(duration) : "\u2014"}</span>
+      <span className="text-sm opacity-60 font-sans">
         {new Date(song.createdAt).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
       </span>
     </button>
@@ -70,5 +70,5 @@ export function SongRow({
 }
 
 export function HeaderCell({ children }: { children: React.ReactNode }) {
-  return <span className="text-xs font-semibold uppercase tracking-wide text-neutral-500 dark:text-neutral-400">{children}</span>;
+  return <span className="text-xs font-extrabold uppercase tracking-[0.15em] text-neutral-500 dark:text-neutral-400 font-heading">{children}</span>;
 }

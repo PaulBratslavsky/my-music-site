@@ -4,7 +4,7 @@ import { useSwipe } from "./useSwipe";
 import { useWaveSurfer } from "./useWaveSurfer";
 import type { Song, LoopMode, MusicPlayerProps } from "./types";
 
-export function usePlayerState({ onAudioElement }: Pick<MusicPlayerProps, "onAudioElement">) {
+export function usePlayerState({ onAudioElement, onSongChange }: Pick<MusicPlayerProps, "onAudioElement" | "onSongChange">) {
   const [songs, setSongs] = useState<Song[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentSong, setCurrentSong] = useState<Song | null>(null);
@@ -13,6 +13,7 @@ export function usePlayerState({ onAudioElement }: Pick<MusicPlayerProps, "onAud
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [durations, setDurations] = useState<Record<string, number>>({});
+  const [volume, setVolumeState] = useState(1);
   const [isMobile, setIsMobile] = useState(false);
   const [layoutKey, setLayoutKey] = useState(0);
 
@@ -64,6 +65,12 @@ export function usePlayerState({ onAudioElement }: Pick<MusicPlayerProps, "onAud
     url.searchParams.set("song", currentSong.documentId);
     window.history.replaceState(null, "", url.toString());
   }, [currentSong]);
+
+  // ── Notify parent of song change ──
+
+  useEffect(() => {
+    onSongChange?.(currentSong);
+  }, [currentSong, onSongChange]);
 
   // ── Ref syncs ──
 
@@ -122,6 +129,11 @@ export function usePlayerState({ onAudioElement }: Pick<MusicPlayerProps, "onAud
       setIsPlaying(true);
     }
   }, [isPlaying]);
+
+  const setVolume = useCallback((v: number) => {
+    setVolumeState(v);
+    if (audioRef.current) audioRef.current.volume = v;
+  }, []);
 
   const cycleLoopMode = useCallback(() => {
     setLoopMode((prev) => (prev === "one" ? "none" : prev === "none" ? "all" : "one"));
@@ -190,11 +202,11 @@ export function usePlayerState({ onAudioElement }: Pick<MusicPlayerProps, "onAud
     // State
     songs, loading, currentSong, isPlaying, loopMode,
     currentTime, duration, durations, songLoading,
-    isMobile, imageUrl, swipeX,
+    volume, isMobile, imageUrl, swipeX,
     // Refs
     waveformContainerRef, audioRefCallback, lastScrolledRef,
     // Actions
-    playNext, playPrev, restartSong, cycleLoopMode,
+    playNext, playPrev, restartSong, cycleLoopMode, setVolume,
     handlePlayPause, handleSongClick,
     handleTouchStart, handleTouchMove, handleTouchEnd,
   };
