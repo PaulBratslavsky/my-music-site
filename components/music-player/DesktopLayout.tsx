@@ -23,9 +23,9 @@ export function DesktopLayout({ player, sample }: Readonly<DesktopLayoutProps>) 
   return (
     <>
       {/* Player */}
-      <div className="grid grid-cols-[180px_1fr] grid-rows-[auto_1fr] gap-x-5 gap-y-3 p-5 bg-neutral-900 border-b border-neutral-800 shrink-0">
+      <div className="grid grid-cols-[180px_1fr] grid-rows-[auto_1fr] gap-x-5 gap-y-3 p-5 bg-neutral-100 dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-800 shrink-0 transition-colors">
         {/* Album art */}
-        <div className="row-span-2 rounded-lg overflow-hidden bg-neutral-800 relative">
+        <div className="row-span-2 rounded-lg overflow-hidden bg-neutral-200 dark:bg-neutral-800 relative">
           {imageUrl ? (
             <Image
               src={imageUrl}
@@ -35,11 +35,11 @@ export function DesktopLayout({ player, sample }: Readonly<DesktopLayoutProps>) 
               sizes="180px"
             />
           ) : (
-            <span className="text-2xl text-neutral-500">&#9834;</span>
+            <span className="text-2xl text-neutral-400 dark:text-neutral-500">&#9834;</span>
           )}
           {/* Neon blue→pink radial tint */}
           <div
-            className="absolute inset-0 mix-blend-color opacity-60 pointer-events-none"
+            className="absolute inset-0 mix-blend-color opacity-50 dark:opacity-60 pointer-events-none"
             style={{ background: "radial-gradient(circle at 30% 70%, #3b82f6 0%, #ec4899 60%, #f43f5e 100%)" }}
           />
         </div>
@@ -54,11 +54,11 @@ export function DesktopLayout({ player, sample }: Readonly<DesktopLayoutProps>) 
             <button
               onClick={handlePlayPause}
               disabled={songLoading}
-              className="w-14 h-14 rounded-full border-2 border-pink-500 text-pink-500 flex items-center justify-center hover:bg-pink-500/10 transition-colors relative z-[1] disabled:opacity-50"
+              className="w-14 h-14 rounded-full border-2 border-player-accent text-player-accent flex items-center justify-center hover:bg-player-accent/10 transition-colors relative z-[1] disabled:opacity-50"
               aria-label={songLoading ? "Loading" : isPlaying ? "Pause" : "Play"}
             >
               {songLoading
-                ? <span className="w-4 h-4 border-2 border-pink-500 border-t-transparent rounded-full animate-spin" />
+                ? <span className="w-4 h-4 border-2 border-player-accent border-t-transparent rounded-full animate-spin" />
                 : isPlaying ? <PauseIcon /> : <PlayIcon />}
             </button>
           </div>
@@ -67,9 +67,9 @@ export function DesktopLayout({ player, sample }: Readonly<DesktopLayoutProps>) 
           <div className="min-w-0 flex-1">
             <p className="text-lg font-bold truncate">{currentSong?.title ?? "Select a song"}</p>
             {currentSong?.artist?.name && (
-              <p className="text-base text-pink-500 truncate">by {currentSong.artist.name}</p>
+              <p className="text-base text-player-accent truncate">by {currentSong.artist.name}</p>
             )}
-            <p className="text-sm text-neutral-500 tabular-nums">
+            <p className="text-sm text-neutral-500 dark:text-neutral-400 tabular-nums">
               {formatTime(currentTime)}
               {duration > 0 && ` / ${formatTime(duration)}`}
             </p>
@@ -89,7 +89,7 @@ export function DesktopLayout({ player, sample }: Readonly<DesktopLayoutProps>) 
           <div ref={waveformContainerRef} className="w-full h-full" />
           {songLoading && (
             <div className="absolute inset-0 flex items-center justify-center">
-              <span className="w-6 h-6 border-2 border-pink-500 border-t-transparent rounded-full animate-spin" />
+              <span className="w-6 h-6 border-2 border-player-accent border-t-transparent rounded-full animate-spin" />
             </div>
           )}
         </div>
@@ -97,7 +97,7 @@ export function DesktopLayout({ player, sample }: Readonly<DesktopLayoutProps>) 
 
       {/* Song List */}
       <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain">
-        <div className="grid grid-cols-[32px_44px_1fr_28px_1fr_64px_88px] gap-3 items-center px-4 py-2 border-b border-neutral-800 sticky top-0 bg-neutral-950 z-10">
+        <div className="grid grid-cols-[32px_44px_1fr_28px_1fr_64px_88px] gap-3 items-center px-4 py-2 border-b border-neutral-200 dark:border-neutral-800 sticky top-0 bg-white dark:bg-neutral-950 z-10 transition-colors">
           <HeaderCell>#</HeaderCell>
           <span />
           <HeaderCell>Title</HeaderCell>
@@ -139,7 +139,7 @@ function ControlButton({ onClick, label, children }: Readonly<{ onClick: () => v
       onClick={onClick}
       type="button"
       aria-label={label}
-      className="w-10 h-10 rounded-full border-2 border-neutral-600 text-neutral-400 flex items-center justify-center hover:border-pink-500 hover:text-pink-500 transition-colors outline-none focus:outline-none"
+      className="w-10 h-10 rounded-full border-2 border-neutral-300 dark:border-neutral-600 text-neutral-500 dark:text-neutral-400 flex items-center justify-center hover:border-player-accent hover:text-player-accent transition-colors outline-none focus:outline-none"
     >
       {children}
     </button>
@@ -148,14 +148,14 @@ function ControlButton({ onClick, label, children }: Readonly<{ onClick: () => v
 
 function LoopButton({ loopMode, onClick }: Readonly<{ loopMode: LoopMode; onClick: () => void }>) {
   let className = "w-10 h-10 rounded-full border-2 flex items-center justify-center transition-colors relative outline-none focus:outline-none ";
-  if (loopMode === "all") className += "border-pink-500 bg-pink-500 text-white hover:bg-pink-600";
-  else if (loopMode === "one") className += "border-pink-500 text-pink-500 hover:bg-pink-500/10";
-  else className += "border-neutral-600 text-neutral-400 hover:border-pink-500 hover:text-pink-500";
+  if (loopMode === "all") className += "border-player-accent bg-player-accent text-white hover:opacity-80";
+  else if (loopMode === "one") className += "border-player-accent text-player-accent hover:bg-player-accent/10";
+  else className += "border-neutral-300 dark:border-neutral-600 text-neutral-500 dark:text-neutral-400 hover:border-player-accent hover:text-player-accent";
 
   return (
     <button onClick={onClick} type="button" aria-label={`Loop: ${loopMode}`} className={className}>
       <LoopIcon />
-      {loopMode === "one" && <span className="absolute -bottom-0.5 -right-0.5 text-[9px] font-bold text-white leading-none">1</span>}
+      {loopMode === "one" && <span className="absolute -bottom-0.5 -right-0.5 text-[9px] font-bold leading-none">1</span>}
     </button>
   );
 }

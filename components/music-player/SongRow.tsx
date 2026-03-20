@@ -38,13 +38,13 @@ export function SongRow({
       ref={rowRef}
       type="button"
       onClick={onClick}
-      className={`w-full grid grid-cols-[32px_44px_1fr_28px_1fr_64px_88px] gap-3 items-center px-4 py-2.5 border-b border-neutral-800 text-left transition-colors last:border-b-0 ${
-        isActive ? "bg-pink-500 text-white rounded-md" : "hover:bg-white/5"
+      className={`w-full grid grid-cols-[32px_44px_1fr_28px_1fr_64px_88px] gap-3 items-center px-4 py-2.5 border-b border-neutral-100 dark:border-neutral-800 text-left transition-colors last:border-b-0 ${
+        isActive ? "bg-player-accent text-white rounded-md" : "hover:bg-neutral-50 dark:hover:bg-white/5"
       }`}
     >
       <span className="text-xs text-center opacity-50">{index + 1}</span>
 
-      <div className="w-10 h-10 rounded bg-neutral-800 overflow-hidden shrink-0 relative">
+      <div className="w-10 h-10 rounded bg-neutral-200 dark:bg-neutral-800 overflow-hidden shrink-0 relative">
         {thumbUrl && (
           <Image src={thumbUrl} alt={song.title ?? ""} fill className="object-cover" sizes="40px" />
         )}
@@ -54,7 +54,7 @@ export function SongRow({
         {song.title || "Untitled"}
       </span>
 
-      <div className="w-7 h-7 rounded-full bg-neutral-800 overflow-hidden shrink-0 relative">
+      <div className="w-7 h-7 rounded-full bg-neutral-200 dark:bg-neutral-800 overflow-hidden shrink-0 relative">
         {avatarUrl && (
           <Image src={avatarUrl} alt={song.artist?.name ?? ""} fill className="object-cover" sizes="28px" />
         )}
@@ -70,5 +70,5 @@ export function SongRow({
 }
 
 export function HeaderCell({ children }: { children: React.ReactNode }) {
-  return <span className="text-xs font-semibold uppercase tracking-wide text-neutral-500">{children}</span>;
+  return <span className="text-xs font-semibold uppercase tracking-wide text-neutral-500 dark:text-neutral-400">{children}</span>;
 }

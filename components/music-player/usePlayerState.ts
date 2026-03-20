@@ -29,9 +29,16 @@ export function usePlayerState({ onAudioElement }: Pick<MusicPlayerProps, "onAud
   useEffect(() => {
     fetchSongs().then((data) => {
       setSongs(data);
-      const songParam = new URLSearchParams(window.location.search).get("song");
+      const params = new URLSearchParams(window.location.search);
+      const songParam = params.get("song");
+      const autoplay = params.get("autoplay");
       const initial = (songParam && data.find((s) => s.documentId === songParam)) || data[0];
-      if (initial) setCurrentSong(initial);
+      if (initial) {
+        setCurrentSong(initial);
+        if (songParam && autoplay !== "false") {
+          shouldAutoPlayRef.current = true;
+        }
+      }
       setLoading(false);
     });
   }, []);

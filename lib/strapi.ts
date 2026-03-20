@@ -16,7 +16,19 @@ export function getStreamURL(documentId: string): string {
   return `${getStrapiURL()}/api/strapi-plugin-music-manager/songs/${documentId}/stream`;
 }
 
-export async function fetchSongs(): Promise<Song[]> {
+export interface PaginatedSongs {
+  data: Song[];
+  meta: {
+    pagination: {
+      page: number;
+      pageSize: number;
+      pageCount: number;
+      total: number;
+    };
+  };
+}
+
+export async function fetchSongs(page = 1, pageSize = 20): Promise<PaginatedSongs> {
   const baseUrl = getStrapiURL();
   const url = new URL("/api/strapi-plugin-music-manager/songs", baseUrl);
   url.search = qs.stringify({
@@ -30,15 +42,35 @@ export async function fetchSongs(): Promise<Song[]> {
       },
       image: { fields: ["url", "alternativeText"] },
     },
-    pagination: { pageSize: 100 },
+    pagination: { page, pageSize },
   });
 
-  const res = await fetch(url.href, { next: { revalidate: 60 } });
+  const res = await fetch(url.href);
   if (!res.ok) {
     console.error(`Failed to fetch songs: ${res.status} ${res.statusText}`);
-    return [];
+    return { data: [], meta: { pagination: { page: 1, pageSize, pageCount: 0, total: 0 } } };
   }
 
+  return res.json();
+}
+
+export async function fetchSongById(documentId: string): Promise<Song | null> {
+  const baseUrl = getStrapiURL();
+  const url = new URL(`/api/strapi-plugin-music-manager/songs/${documentId}`, baseUrl);
+  url.search = qs.stringify({
+    populate: {
+      artist: {
+        fields: ["name"],
+        populate: {
+          image: { fields: ["url", "alternativeText"] },
+        },
+      },
+      image: { fields: ["url", "alternativeText"] },
+    },
+  });
+
+  const res = await fetch(url.href);
+  if (!res.ok) return null;
   const json = await res.json();
-  return json.data ?? [];
+  return json.data ?? null;
 }

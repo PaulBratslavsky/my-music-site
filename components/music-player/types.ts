@@ -30,4 +30,5 @@ export type LoopMode = "none" | "all" | "one";
 export interface MusicPlayerProps {
   onAudioElement?: (el: HTMLAudioElement | null) => void;
   sample?: () => AudioData | null;
+  forceMobile?: boolean;
 }
