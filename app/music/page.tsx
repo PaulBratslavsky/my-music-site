@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { MusicPlayer } from "@/app/components/music-player";
-import { AudioBackground } from "@/app/components/audio-background/AudioBackground";
-import { useAudioAnalyser } from "@/app/components/audio-background/useAudioAnalyser";
+import { MusicPlayer } from "../components/music-player";
+import { AudioBackground } from "../components/audio-background/AudioBackground";
+import { useAudioAnalyser } from "../components/audio-background/useAudioAnalyser";
 
 export default function MusicPage() {
   const [audioEl, setAudioEl] = useState<HTMLAudioElement | null>(null);

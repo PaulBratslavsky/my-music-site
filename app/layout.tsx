@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -28,6 +29,10 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         {children}
+        <Script
+          src={`${process.env.NEXT_PUBLIC_STRAPI_URL ?? "http://localhost:1337"}/api/strapi-plugin-music-manager/widget.js`}
+          strategy="lazyOnload"
+        />
       </body>
     </html>
   );

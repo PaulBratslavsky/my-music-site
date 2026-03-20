@@ -1,0 +1,161 @@
+import Image from "next/image";
+import { AlbumRadialEffect } from "../AlbumRadialEffect";
+import { formatTime, getStrapiMedia } from "./api";
+import { PlayIcon, PauseIcon, PrevIcon, NextIcon, RestartIcon, LoopIcon } from "./icons";
+import { SongRow, HeaderCell } from "./SongRow";
+import type { PlayerState } from "./usePlayerState";
+import type { LoopMode, AudioData } from "./types";
+
+interface DesktopLayoutProps {
+  player: PlayerState;
+  sample?: () => AudioData | null;
+}
+
+export function DesktopLayout({ player, sample }: Readonly<DesktopLayoutProps>) {
+  const {
+    songs, currentSong, isPlaying, loopMode,
+    currentTime, duration, durations, songLoading,
+    imageUrl, waveformContainerRef, lastScrolledRef,
+    handlePlayPause, playPrev, playNext, restartSong,
+    cycleLoopMode, handleSongClick,
+  } = player;
+
+  return (
+    <>
+      {/* Player */}
+      <div className="grid grid-cols-[180px_1fr] grid-rows-[auto_1fr] gap-x-5 gap-y-3 p-5 bg-neutral-900 border-b border-neutral-800 shrink-0">
+        {/* Album art */}
+        <div className="row-span-2 rounded-lg overflow-hidden bg-neutral-800 relative">
+          {imageUrl ? (
+            <Image
+              src={imageUrl}
+              alt={currentSong?.image?.alternativeText ?? currentSong?.title ?? "Album art"}
+              fill
+              className="object-cover"
+              sizes="180px"
+            />
+          ) : (
+            <span className="text-2xl text-neutral-500">&#9834;</span>
+          )}
+          {/* Neon blue→pink radial tint */}
+          <div
+            className="absolute inset-0 mix-blend-color opacity-60 pointer-events-none"
+            style={{ background: "radial-gradient(circle at 30% 70%, #3b82f6 0%, #ec4899 60%, #f43f5e 100%)" }}
+          />
+        </div>
+
+        {/* Row 1: Controls + song info */}
+        <div className="flex items-center gap-4 min-w-0">
+          {/* Play/Pause with radial effect */}
+          <div className="relative w-14 h-14 flex items-center justify-center shrink-0">
+            <div className="absolute -inset-5 pointer-events-none">
+              {sample && <AlbumRadialEffect sample={sample} />}
+            </div>
+            <button
+              onClick={handlePlayPause}
+              disabled={songLoading}
+              className="w-14 h-14 rounded-full border-2 border-pink-500 text-pink-500 flex items-center justify-center hover:bg-pink-500/10 transition-colors relative z-[1] disabled:opacity-50"
+              aria-label={songLoading ? "Loading" : isPlaying ? "Pause" : "Play"}
+            >
+              {songLoading
+                ? <span className="w-4 h-4 border-2 border-pink-500 border-t-transparent rounded-full animate-spin" />
+                : isPlaying ? <PauseIcon /> : <PlayIcon />}
+            </button>
+          </div>
+
+          {/* Song info */}
+          <div className="min-w-0 flex-1">
+            <p className="text-lg font-bold truncate">{currentSong?.title ?? "Select a song"}</p>
+            {currentSong?.artist?.name && (
+              <p className="text-base text-pink-500 truncate">by {currentSong.artist.name}</p>
+            )}
+            <p className="text-sm text-neutral-500 tabular-nums">
+              {formatTime(currentTime)}
+              {duration > 0 && ` / ${formatTime(duration)}`}
+            </p>
+          </div>
+
+          {/* Transport controls */}
+          <div className="flex gap-1 shrink-0">
+            <ControlButton onClick={playPrev} label="Previous"><PrevIcon /></ControlButton>
+            <ControlButton onClick={restartSong} label="Restart"><RestartIcon /></ControlButton>
+            <ControlButton onClick={playNext} label="Next"><NextIcon /></ControlButton>
+            <LoopButton loopMode={loopMode} onClick={cycleLoopMode} />
+          </div>
+        </div>
+
+        {/* Row 2: Waveform */}
+        <div className="relative min-h-[120px]">
+          <div ref={waveformContainerRef} className="w-full h-full" />
+          {songLoading && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="w-6 h-6 border-2 border-pink-500 border-t-transparent rounded-full animate-spin" />
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Song List */}
+      <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain">
+        <div className="grid grid-cols-[32px_44px_1fr_28px_1fr_64px_88px] gap-3 items-center px-4 py-2 border-b border-neutral-800 sticky top-0 bg-neutral-950 z-10">
+          <HeaderCell>#</HeaderCell>
+          <span />
+          <HeaderCell>Title</HeaderCell>
+          <span />
+          <HeaderCell>Artist</HeaderCell>
+          <HeaderCell>Time</HeaderCell>
+          <HeaderCell>Added</HeaderCell>
+        </div>
+
+        {songs.map((song, index) => {
+          const isActive = currentSong?.documentId === song.documentId;
+          const thumbUrl = getStrapiMedia(song.image?.url ?? null);
+          const avatarUrl = getStrapiMedia(song.artist?.image?.url ?? null);
+
+          return (
+            <SongRow
+              key={song.documentId}
+              song={song}
+              index={index}
+              isActive={isActive}
+              thumbUrl={thumbUrl}
+              avatarUrl={avatarUrl}
+              duration={durations[song.documentId]}
+              onClick={() => handleSongClick(song)}
+              scrollRef={lastScrolledRef}
+            />
+          );
+        })}
+      </div>
+    </>
+  );
+}
+
+/* ── Desktop-only sub-components ── */
+
+function ControlButton({ onClick, label, children }: Readonly<{ onClick: () => void; label: string; children: React.ReactNode }>) {
+  return (
+    <button
+      onClick={onClick}
+      type="button"
+      aria-label={label}
+      className="w-10 h-10 rounded-full border-2 border-neutral-600 text-neutral-400 flex items-center justify-center hover:border-pink-500 hover:text-pink-500 transition-colors outline-none focus:outline-none"
+    >
+      {children}
+    </button>
+  );
+}
+
+function LoopButton({ loopMode, onClick }: Readonly<{ loopMode: LoopMode; onClick: () => void }>) {
+  let className = "w-10 h-10 rounded-full border-2 flex items-center justify-center transition-colors relative outline-none focus:outline-none ";
+  if (loopMode === "all") className += "border-pink-500 bg-pink-500 text-white hover:bg-pink-600";
+  else if (loopMode === "one") className += "border-pink-500 text-pink-500 hover:bg-pink-500/10";
+  else className += "border-neutral-600 text-neutral-400 hover:border-pink-500 hover:text-pink-500";
+
+  return (
+    <button onClick={onClick} type="button" aria-label={`Loop: ${loopMode}`} className={className}>
+      <LoopIcon />
+      {loopMode === "one" && <span className="absolute -bottom-0.5 -right-0.5 text-[9px] font-bold text-white leading-none">1</span>}
+    </button>
+  );
+}
